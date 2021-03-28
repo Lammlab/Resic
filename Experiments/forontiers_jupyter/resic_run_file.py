@@ -121,8 +121,8 @@ class PipeTester():
         def sam_to_pileup(sam_name,fasta_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name):
             command=(   f"oldsamtools view -bS {sam_name} > {bam_name} && " +
                         f"oldsamtools sort {bam_name} {sorted_bam_name} && " +
-                        f"oldsamtools mpileup -f {fasta_name} {sorted_bam_name}.bam > {pileup_name} &&" + 
-                        f"sed -r '/^[\t]*$/d' <{pileup_name} | sort -k1,1V -k2,2n -o {sorted_pileup_name} "
+                        f"oldsamtools mpileup -f {fasta_name} {sorted_bam_name}.bam > {pileup_name} &&" + #| tail -n +3 
+                        f"sed -r '/^[\t]*$/d' <{pileup_name} | sort -k1,1 -k2,2n -o {sorted_pileup_name} "
                         )
             try:
                 outout=subprocess.check_output(command,shell=True)
@@ -568,26 +568,20 @@ def real_pipe():
     reverse=False
 
     # real data molegra
-    root_dir = "/Data/bioinf/resik/PRJEB2445_75SR"
+    root_dir = ""
     if reverse:
-        root_dir += "_reverse"
+        root_dir += ""
 
 
-    data_dir = "/Data/bioinf/resik/PRJEB2445_nonmixed_tissues_75SR"
+    data_dir = ""
 
-    reference_library = "/Data/reference_genomes/human/GRCh37_latest_genomic.fna"
+    reference_library = ""
 
 
-    positive_fastqs = ['ERR030888.fastq.trimmed_2_60.collapsed',
-                       'ERR030889.fastq.trimmed_2_60.collapsed',
-                       'ERR030890.fastq.trimmed_2_60.collapsed',
-                       'ERR030891.fastq.trimmed_2_60.collapsed',
-                       'ERR030892.fastq.trimmed_2_60.collapsed',
-                       'ERR030893.fastq.trimmed_2_60.collapsed',
-                       'ERR030894.fastq.trimmed_2_60.collapsed']                       
+    positive_fastqs = []                       
     negative_fastqs = []
 
-    snp_database = ['/Data/bioinf/resik/vcf_files/GRCh37_latest_dbSNP_all_no_headers.vcf']
+    snp_database = []
 
     
     if not os.path.exists(root_dir):
@@ -617,34 +611,34 @@ def real_pipe():
     # aligner,spec_dict,graph_dict,group_dict=naive_3nt_graph_config()
 
     test_pipe = PipeTester(root_dir, positive_fastqs, negative_fastqs, reference_library, 
-        graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, Disable_parallel=True,
+        graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, Disable_parallel=False,
         skip_existing_files=True, snp_database=snp_database)
 
     # to remove previous files
-    # test_pipe.remove_files()
-    # test_pipe.filter_fastq()
+    test_pipe.remove_files()
+    test_pipe.filter_fastq()
 
-    #test_pipe.include_exclude_alignment_test()
+    test_pipe.include_exclude_alignment_test()
 
-    #test_pipe.pileup_creation_test()
+    test_pipe.pileup_creation_test()
 
-    #test_pipe.filter_nochange_test()
+    test_pipe.filter_nochange_test()
 
-    #test_pipe.filter_readthreshold_test(threshold=2)
+    test_pipe.filter_readthreshold_test(threshold=2)
 
-    #test_pipe.snp_removal_test()
+    test_pipe.snp_removal_test()
 
-    #test_pipe.editing_percent_test(editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2)
+    test_pipe.editing_percent_test(editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2)
 
-    #test_pipe.hyper_non_relevant_editing_site_test()
+    test_pipe.hyper_non_relevant_editing_site_test()
     
-    #test_pipe.unique_site_test()
+    test_pipe.unique_site_test()
 
-    #test_pipe.concensus_test(consensus_threshold=0)
+    test_pipe.concensus_test(consensus_threshold=0.5)
 
     test_pipe.site_loss_plot_test()
 
-    #test_pipe.editing_percent_plot_generate_summaries(editing_min_thresh=30, editing_max_thresh=99, noise_thresh=3, read_thresh=2)
+    test_pipe.editing_percent_plot_generate_summaries(editing_min_thresh=30, editing_max_thresh=99, noise_thresh=3, read_thresh=2)
 
     test_pipe.editing_percent_plot_generate_plot()
 
