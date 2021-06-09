@@ -14,15 +14,31 @@ RESIC implements a graph aligner module that enables modular composition of new 
 
 
 
-### Installing and Running
+### Installing 
 
 ```bash
 # download the repo
 git clone https://github.com/Lammlab/Resic
 cd Resic
 
-# add directories to PYTHONPATH
+# install python dependencies
+pip install requirements.txt
+
+# install samtools and bowtie
+
+# add modules to PYTHONPATH
 echo 'export PYTHONPATH="$PYTHONPATH:${HOME}/Resic"' > ~/.bashrc
 
 ```
 
+### Running
+
+To edit the function `real_pipe` in the following file and then run it following file
+
+```bash
+python Experiments/forontiers_jupyter/resic_run_file.py
+```
+
+Examples of runs performed in the paper can be seen in the `Experiments/forontiers_jupyter` directory in files starting with `pipeline_test` .
+
+There is also a jupyter notebook is that directory that walks through the different steps of the pipeline.

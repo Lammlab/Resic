@@ -51,6 +51,7 @@ def stacked_bar(data, series_labels=None, category_labels=None,
 
     if size_plot:
         fig = plt.figure(figsize=size_plot)
+    plt.rcParams['font.size'] = '20'
 
     suit_colors_dict = {}
     for index, column in enumerate(series_labels):
@@ -78,10 +79,10 @@ def stacked_bar(data, series_labels=None, category_labels=None,
         cum_size += row_data
 
     if not category_labels is None:
-        plt.xticks(ind2, category_labels, rotation=20, fontsize=15)
+        plt.xticks(ind2, category_labels, rotation=20, fontsize=30)
 
     if y_label != None:
-        plt.ylabel(y_label, fontsize=15)
+        plt.ylabel(y_label, fontsize=30)
 
     plt.legend()
 
