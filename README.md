@@ -1,7 +1,5 @@
 # RESIC A tool for comprehensive adenosine to inosine RNA Editing Site Identification and Classification
 
-[toc]
-
 This is the code repository of the [RESIC](https://www.biorxiv.org/content/10.1101/2021.04.11.439401v1) Paper.
 
 RESIC is  an efficient pipeline that combines several approaches for the detection and classification of RNA editing sites. The pipeline can be used for all organisms and can use any number of RNA-sequencing datasets as input. RESIC provides: 
@@ -15,6 +13,10 @@ RESIC implements a graph aligner module that enables modular composition of new 
 
 
 ### Installing 
+
+resic requires:
+* [Bowtie version 0.12.7](https://sourceforge.net/projects/bowtie-bio/files/bowtie/0.12.7/bowtie-0.12.7-linux-x86_64.zip/download)
+* [Samtools 1.7](https://github.com/samtools/samtools/releases/tag/1.7)
 
 ```bash
 # download the repo
