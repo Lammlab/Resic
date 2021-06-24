@@ -41,6 +41,3 @@ To edit the function `real_pipe` in the following file and then run it following
 python Experiments/forontiers_jupyter/resic_run_file.py
 ```
 
-Examples of runs performed in the paper can be seen in the `Experiments/forontiers_jupyter` directory in files starting with `pipeline_test` .
-
-There is also a jupyter notebook is that directory that walks through the different steps of the pipeline.
