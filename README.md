@@ -35,7 +35,7 @@ echo 'export PYTHONPATH="$PYTHONPATH:${HOME}/Resic"' > ~/.bashrc
 
 ### Running
 
-To edit the function `real_pipe` in the following file and then run it following file
+Edit the function `real_pipe` in the following file and then run it:
 
 ```bash
 python Experiments/forontiers_jupyter/resic_run_file.py
