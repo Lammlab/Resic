@@ -1,6 +1,6 @@
 # RESIC A tool for comprehensive adenosine to inosine RNA Editing Site Identification and Classification
 
-This is the code repository of the [RESIC](https://www.biorxiv.org/content/10.1101/2021.04.11.439401v1) Paper.
+This is the code repository of the [RESIC](https://www.frontiersin.org/articles/10.3389/fgene.2021.686851/full) Paper.
 
 RESIC is  an efficient pipeline that combines several approaches for the detection and classification of RNA editing sites. The pipeline can be used for all organisms and can use any number of RNA-sequencing datasets as input. RESIC provides: 
 
