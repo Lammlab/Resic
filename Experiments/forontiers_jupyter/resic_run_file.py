@@ -1,3 +1,7 @@
+"""
+To run resic all you need to do is to edit the real_pipe function (below) and run this file.
+"""
+
 import logging
 import unittest
 import os
@@ -128,7 +132,7 @@ class PipeTester():
             except subprocess.CalledProcessError as e:
                 logging.error(f"pileup conversions of {sam_name} failed")
                 raise e
-            #multiline_sort_pileup(1, '~~~', 1, pileup_name, 2, sorted_pileup_name)
+
             return
         def sams_to_pileup(fasta_name,sam_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name,antisense_sam, combined_sam_name):
             merge_sams([sam_name, antisense_sam], combined_sam_name)
@@ -262,7 +266,6 @@ class PipeTester():
                         out.write(str(line_to_write[0]) + "\n")
             for obj in neg_obj_list:
                 obj.close()
-            #TODO: maybe move the above code to a different function
         
                 
         commands=[]
@@ -345,11 +348,6 @@ class PipeTester():
             for node in graph_dict.keys():
                 pileup_files_from_all_nodes.append(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True))
             write_unique_sites(pileup_files_from_all_nodes, sorted_input=True)
-
-            #command=[write_unique_sites, pileup_files_from_all_nodes, sorted_input=True]
-            #commands.append(command)
-
-        #parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_paralle
 
 
     def concensus_test(self,consensus_threshold=0.5):
@@ -563,25 +561,37 @@ def calculate_dictinary_colors_for_editing_percent(dirstruct, positive_fastqs, g
 
 
 def real_pipe():
-    
+    # this is the main function.
+    # all you need to do is to add the paths to your files and run this file
+
+    # this option reverse the negative and positive fastq samples. It is used for quality control
+    # do NOT change it for a regular run.
     reverse=False
 
-    # real data molegra
+    # the output directory 
     root_dir = ""
+
+    # no need to add a path for a regular run.
     if reverse:
         root_dir += ""
 
-
+    # the directory in which the fastq input files are located
     data_dir = ""
-
+    # a path to a fasta file to use as a reference genome (either indexed or not indexed)
     reference_library = ""
 
+    # a list of fastq sample names for which you want to detect editing sites
+    positive_fastqs = []
 
-    positive_fastqs = []                       
+    # Optional-  a list of fastq sample names that will be used to exclude non-editing sites.
+    # these can be DNA reads or mutant strains that are lacking the editing mechanism.               
     negative_fastqs = []
 
+    # Optional - a dbSNP vcf file, currently WITH NO HEADERS, to exclude SNPs.
+    # remove all lines that start with #
     snp_database = []
 
+    # Note: currently we support using either a snp database or negative files and not both at once.
     
     if not os.path.exists(root_dir):
         os.makedirs(root_dir)
@@ -613,7 +623,11 @@ def real_pipe():
         graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, Disable_parallel=False,
         skip_existing_files=True, snp_database=snp_database)
 
-    # to remove previous files
+    """
+    You can comment function that you want to skip. All functions together creats RECIC
+    Thresholds can be modified.
+    """
+    # comment the test_pipe.remove_files if you want to keep previous files in the output directory
     test_pipe.remove_files()
     test_pipe.filter_fastq()
 
