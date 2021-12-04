@@ -22,15 +22,14 @@ Dict_specifications = Dict[Specifications, Fathers_list]
 # default aligner
 bowtie_wrapper = AlignerWrapper("bowtie {flags} --sam {reference_file} {lib} {positive_alignment} --un {negative_library} >> {log}.bowtie 2>&1", "bowtie-build {reference} {reference} {flags}",
                                 index_output_format_list=["{reference_file}"+suff for suff in [".1.ebwt",".2.ebwt",".3.ebwt",".4.ebwt",".rev.1.ebwt",".rev.2.ebwt"]])
-#bowtie_wrapper = AlignerWrapper("/home/lammlab/Downloads/bowtie-0.12.7/bowtie {flags} --sam {reference_file} {lib} {positive_alignment} --un {negative_library} >> {log}.bowtie 2>&1", "/home/lammlab/Downloads/bowtie-0.12.7/bowtie-build {reference} {reference} {flags}")
 
 
 def do_include_exclude_alignment(fastq_file: str, fasta_file: str, dict_data, dict_graph,
                                  dir_struct:DirectoryStructure, aligner:AlignerWrapper, skip_existing_files=False):
-    #gaol:Combines dict_data  and dict_graph information into one dict
-    #from dict_data(spec_dict from the main tool): key and value are given now as the key with fields under
+    # gaol:Combines dict_data and dict_graph information into one dict
+    # from dict_data(spec_dict from the main tool): key and value are given now as the key with fields under
     # "Specifications" 
-    #from dict_graph: the value will be the value in the new dict
+    # from dict_graph: the value will be the value in the new dict
     spec_dict = dict()
     for id1 in dict_graph.keys():
         spec_dict[Specifications(id1, dict_data[id1][0], dict_data[id1][1], dict_data[id1][2])] = dict_graph[id1]
@@ -116,7 +115,6 @@ def do_pre_align_post(fastq, fasta_file, id_step, tree_threads, aligner:AlignerW
 
         #set variable to true if on a hyper stage (e.g.: rep_hyper_A_C)
         hyper = not (id_step == "rep" or id_step == "norep")
-        #print("id step: ", id_step, " hyper: ", hyper)
             
         # define file names
         pre_fasta = dirstruct.pathName(fastq, id_step, Stages.graph_aligner, AlignStage.pre_fasta) #reference file after converting to 3nt
@@ -166,7 +164,7 @@ def do_pre_align_post(fastq, fasta_file, id_step, tree_threads, aligner:AlignerW
                 else:
                     skip_post = skip_existing_files
                 
-        #TODO: skipping innacurate, since align and post stage currently share antisense fastq?
+        #TODO: skipping innacurate, since align and post stage currently share antisense fastq
         
         #setting skip allign true only if skip exisiting file and aligned output exist
         skip_align = False
