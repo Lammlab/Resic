@@ -29,7 +29,7 @@ pip install requirements.txt
 # install samtools and bowtie
 
 # add modules to PYTHONPATH
-echo 'export PYTHONPATH="$PYTHONPATH:${HOME}/Resic"' > ~/.bashrc
+export PYTHONPATH="{your_path_to_resic_repo}/Resic/"
 
 ```
 
