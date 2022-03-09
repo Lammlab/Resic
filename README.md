@@ -24,7 +24,7 @@ git clone https://github.com/Lammlab/Resic
 cd Resic
 
 # install python dependencies
-pip install requirements.txt
+pip install -r requirements.txt
 
 # install samtools and bowtie
 
