@@ -11,8 +11,6 @@ Options:
 
 """
 from docopt import docopt
-# info : this file recives pileup file name and sort its lines according to their id and pos
-
 from Utility.Pileup_class import Pileup_line
 from Utility.generators_utilities import key_sorted_gen, class_generator
 
@@ -34,7 +32,11 @@ def pileup_sort(in_pileup, out_pileup):
 				file1.write(line)
 				
 
+def parameters_description():
+	pass
 
+def example_description():
+	pass
 
 if __name__ == "__main__":
 	arguments = docopt(__doc__)

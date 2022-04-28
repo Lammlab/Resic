@@ -7,11 +7,9 @@ from Utility.Fastq_class import Fastq
 import multiprocessing
 import itertools
 import os
-import re
 import logging
 import Utility
-from contextlib import nullcontext
-from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure ,Stages,AlignStage
+from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure, Stages, AlignStage
 from Experiments.frontiers_jupyter.aligner_wrapper import AlignerWrapper
 from Processing.genome_3nt import complement_multiline, flip_sam_flags, reverse_multiline
 

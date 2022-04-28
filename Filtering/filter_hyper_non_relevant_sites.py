@@ -8,12 +8,6 @@
 # Therefore, this script is needed to filter the hyper editing files to include only X -> Y or Y -> X changes.
 ##############################################################################################################################
 
-from Utility.generators_utilities import class_generator
-from Utility.parallel_generator import parallel_generator
-from Utility.Pileup_class import Pileup_line
-from Processing.pileup_sorting import pileup_sort
-from docopt import docopt
-import tempfile
 import os
 import shutil
 

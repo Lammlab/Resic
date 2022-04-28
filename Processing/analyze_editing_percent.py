@@ -32,7 +32,8 @@ from Experiments.frontiers_jupyter.parallel_commands import parallel_commands
 
 
 def is_pileup_line_edited(pileup_line: Pileup_line, read_thresh_hold=1, editing_min_percent_threshold=0.,
-                          editing_max_percent_threshold=100, noise_percent_threshold=100, const_tag='', editing_read_thresh=0):
+                          editing_max_percent_threshold=100, noise_percent_threshold=100, const_tag='',
+                          editing_read_thresh=0):
     """
 
     adds editing percentage and noise percentage to pileup line, tags as editing site if passed thresholds
@@ -76,9 +77,10 @@ def is_pileup_line_edited(pileup_line: Pileup_line, read_thresh_hold=1, editing_
             if (nucl != candidate_nucl) and (nucl in ['A', 'C', 'T', 'G']):
                 noise_reads += 1
         noise_percent = round(float(100 * (noise_reads / pileup_line.base_count)), 3)
-    if is_reads_threshold_match(pileup_line, read_thresh_hold) and (editing_percent >= editing_min_percent_threshold 
-        and editing_percent <= editing_max_percent_threshold) and (noise_percent <= noise_percent_threshold) and (
-        editing_percent is not 0.0) and (candidate_nucl_reads >= editing_read_thresh):
+    if is_reads_threshold_match(pileup_line, read_thresh_hold) and (editing_percent >= editing_min_percent_threshold
+                                                                    and editing_percent <= editing_max_percent_threshold) and (
+            noise_percent <= noise_percent_threshold) and (
+            editing_percent is not 0.0) and (candidate_nucl_reads >= editing_read_thresh):
         is_editing_site = True
     else:
         is_editing_site = False
@@ -97,9 +99,9 @@ def is_pileup_line_edited(pileup_line: Pileup_line, read_thresh_hold=1, editing_
 
     # calculate editing type
     if is_editing_site:
-        #TODO patch change to make sure we dont get lowercase reference or nucl change
+        # TODO patch change to make sure we dont get lowercase reference or nucl change
         editing_type = (pileup_line.reference.upper(), candidate_nucl.upper())
-        #editing_type = (pileup_line.reference, candidate_nucl)
+        # editing_type = (pileup_line.reference, candidate_nucl)
     else:
         editing_type = 'unchanged'
 
@@ -110,25 +112,24 @@ def is_reads_threshold_match(pileup_line, treshold):
     return pileup_line.base_count >= treshold
 
 
-def filter_pileup_by_categories(pileup_filename, output, reads_threshold=None, any_change=None, editing_min_percent=None,
+def filter_pileup_by_categories(pileup_filename, output, reads_threshold=None, any_change=None,
+                                editing_min_percent=None,
                                 editing_max_percent=None, noise_percent=None, editing_read_thresh=0):
     """
     this function filtered a pileup file by reads threshold *or* by any change (editing percent > 0) *or* by editing
     percent threshold and noise_percent threshold
-
     :param pileup_filename: pileup file path
     :param output: the output path for the filtered pileup
     :param reads_threshold: if we want to filter by reads threshold - put a number in this var
     :param any_change: if we want to filter by any change (more then 0 editing percent) put true in this var
     :param editing_min/max_percent: if we want to filter by editing percent threashold, put threshold here
     :param noise_percent: if we want to filter by noise_percent threashold, put threshold here
-
     """
 
     with open(pileup_filename) as pileup, open(output, "w") as out:
         for line in class_generator(Pileup_line, file=pileup):
 
-            if reads_threshold is not None and is_reads_threshold_match(line,reads_threshold):
+            if reads_threshold is not None and is_reads_threshold_match(line, reads_threshold):
                 out.write(str(line) + "\n")
 
             if any_change:
@@ -138,16 +139,25 @@ def filter_pileup_by_categories(pileup_filename, output, reads_threshold=None, a
 
             if editing_min_percent is not None:
                 if all([editing_max_percent, noise_percent]):
-                    editing_type, pileup_line = is_pileup_line_edited(line, editing_min_percent_threshold=editing_min_percent,
-                                                                        editing_max_percent_threshold=editing_max_percent,
-                                                                        noise_percent_threshold=noise_percent,
-                                                                        editing_read_thresh=editing_read_thresh)
+                    editing_type, pileup_line = is_pileup_line_edited(line,
+                                                                      editing_min_percent_threshold=editing_min_percent,
+                                                                      editing_max_percent_threshold=editing_max_percent,
+                                                                      noise_percent_threshold=noise_percent,
+                                                                      editing_read_thresh=editing_read_thresh)
                 elif editing_max_percent is not None:
-                    editing_type, pileup_line = is_pileup_line_edited(line, editing_min_percent_threshold=editing_min_percent, editing_max_percent_threshold=editing_max_percent, editing_read_thresh=editing_read_thresh)
+                    editing_type, pileup_line = is_pileup_line_edited(line,
+                                                                      editing_min_percent_threshold=editing_min_percent,
+                                                                      editing_max_percent_threshold=editing_max_percent,
+                                                                      editing_read_thresh=editing_read_thresh)
                 elif noise_percent_threshold is not None:
-                    editing_type, pileup_line = is_pileup_line_edited(line, editing_min_percent_threshold=editing_min_percent, noise_percent_threshold=noise_percent, editing_read_thresh=editing_read_thresh)
+                    editing_type, pileup_line = is_pileup_line_edited(line,
+                                                                      editing_min_percent_threshold=editing_min_percent,
+                                                                      noise_percent_threshold=noise_percent,
+                                                                      editing_read_thresh=editing_read_thresh)
                 else:
-                    editing_type, pileup_line = is_pileup_line_edited(line, editing_min_percent_threshold=editing_min_percent, editing_read_thresh=editing_read_thresh)
+                    editing_type, pileup_line = is_pileup_line_edited(line,
+                                                                      editing_min_percent_threshold=editing_min_percent,
+                                                                      editing_read_thresh=editing_read_thresh)
 
                 if editing_type != 'unchanged':
                     out.write(str(line) + "\n")
@@ -167,8 +177,9 @@ def get_header_line(const_tag=''):
     return header_line
 
 
-def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_headers=False, summary_only=False, min_editing=0,
-                            max_noise=100, min_reads=1, edit_tag='' ):
+def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_headers=False, summary_only=False,
+                            min_editing=0,
+                            max_noise=100, min_reads=1, edit_tag=''):
     """
     analyses pileup file editing sites and summarises it
     @param pileup_file: input pileup file name
@@ -190,13 +201,14 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
     with open(pileup_file, 'r') as in_fp, \
             open(out_file, 'w') as out_fp:
 
-        #"r","y","s","w","k","m","b","d","h","v","n"
+        # "r","y","s","w","k","m","b","d","h","v","n"
         # intitalize zero counts in summary dict
-        #summary_dict = {(nuc1, nuc2): 0 for nuc1, nuc2 in itertools.product('acgtACGT', repeat=2) if nuc1.upper() != nuc2.upper()}
-        #TODO why do we need lower case references?
+        # summary_dict = {(nuc1, nuc2): 0 for nuc1, nuc2 in itertools.product('acgtACGT', repeat=2) if nuc1.upper() != nuc2.upper()}
+        # TODO why do we need lower case references?
 
-        summary_dict = {(nuc1, nuc2): 0 for nuc1, nuc2 in itertools.product('ACGTN', repeat=2) if nuc1.upper() != nuc2.upper()}
-        #add RYSWKMBDHV to string if needed
+        summary_dict = {(nuc1, nuc2): 0 for nuc1, nuc2 in itertools.product('ACGTN', repeat=2) if
+                        nuc1.upper() != nuc2.upper()}
+        # add RYSWKMBDHV to string if needed
 
         summary_dict['unchanged'] = 0
 
@@ -226,7 +238,7 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
 
             # if not summarise only, print the pileup line
             if not summary_only:
-                #out_fp.write("\n")
+                # out_fp.write("\n")
                 if not add_headers:
                     out_fp.writelines([str(new_pileup_line)])
                     out_fp.write("\n")
@@ -235,7 +247,7 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
                     out_fp.write("\n")
 
         # dont skip file, create empty summary
-        #if line_num == -1 :
+        # if line_num == -1 :
         #    open(summary_file, "w").close()
         #    return #when the file is empty - skip the file!
         ##out_fp.write("\n")
@@ -243,7 +255,8 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
         # make summary counts into percentage
         total_line_number = line_num + 1
 
-        summary_dict_sub = {key: float(val) / total_line_number if total_line_number != 0 else 0 for key, val in summary_dict.items() }
+        summary_dict_sub = {key: float(val) / total_line_number if total_line_number != 0 else 0 for key, val in
+                            summary_dict.items()}
 
         # printing the summary format to an individual file
         with open(summary_file, "w") as file1:
@@ -252,7 +265,7 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
 
             file1.write(summer_str)
 
-        return  summer_str
+        return summer_str
 
 
 def individual_summary_format(filename, summary_dict):
@@ -296,9 +309,11 @@ def summary_format(summary_dict):
     return str(summary_dict.items())
 
 
-def analyse_multiple_editing_percent_files(pileup_files, out_pileups, summary_files,total_summary_file=None, add_headers=False,
-                                           summary_only=False, min_editing=0.0, max_editing=100.0, max_noise=100.0, min_reads=1,
-                                           edit_tag=None, parallel_limit=2,Disable_parallel=True ):
+def analyse_multiple_editing_percent_files(pileup_files, out_pileups, summary_files, total_summary_file=None,
+                                           add_headers=False,
+                                           summary_only=False, min_editing=0.0, max_editing=100.0, max_noise=100.0,
+                                           min_reads=1,
+                                           edit_tag=None, parallel_limit=2, Disable_parallel=True):
     """
     analyses pileup file and summarises it
     :param pileup_files: list of pileup_files
@@ -316,18 +331,16 @@ def analyse_multiple_editing_percent_files(pileup_files, out_pileups, summary_fi
     :return:
     """
 
-
-        # collecting commands for parallel
+    # collecting commands for parallel
     commands = []
     for in_file, out_file, summary_file in zip(pileup_files, out_pileups, summary_files):
         # False,False map to add_headers and summary_only
-        command = [analyse_editing_percent,in_file,out_file,summary_file,
-                   add_headers,summary_only,min_editing,max_noise,min_reads,edit_tag]
+        command = [analyse_editing_percent, in_file, out_file, summary_file,
+                   add_headers, summary_only, min_editing, max_noise, min_reads, edit_tag]
         commands.append(command)
 
     # run parallel editing percent + summary printing for the pileup files
-    parallel_commands(commands,parallel_limit=parallel_limit,Disable_parallel=Disable_parallel)
-
+    parallel_commands(commands, parallel_limit=parallel_limit, Disable_parallel=Disable_parallel)
 
     # if total summary was requested,
     # get the summary strings to write to the summary output file
@@ -338,7 +351,6 @@ def analyse_multiple_editing_percent_files(pileup_files, out_pileups, summary_fi
             sumfile.write("\n".join(lines_list))
 
     return
-
 
 
 def get_full_summary_str(out_files):
@@ -353,7 +365,7 @@ def get_full_summary_str(out_files):
     for file_summer in out_files:
         with open(file_summer, "r") as file1:
             lines = file1.readlines()
-        if len(lines) == 0 :
+        if len(lines) == 0:
             continue
         summary_dict_file = individual_summary_format_to_dict(lines)
         for key in summary_dict_file.keys():
@@ -449,17 +461,17 @@ if __name__ == '__main__':
     out_dir = args['--out_dir']
     if out_dir is None:
         out_dir = os.path.dirname(summary_filename)
-        out_pileups=[pile+"_edited" for pile in pileups_names]
+        out_pileups = [pile + "_edited" for pile in pileups_names]
     else:
         summary_filename = os.path.join(out_dir, summary_filename)
-        pileup_base_names=[os.path.basename(pile) for pile in pileups_names]
-        out_pileups=[ os.path.join(out_dir,pile) for pile in pileup_base_names]
+        pileup_base_names = [os.path.basename(pile) for pile in pileups_names]
+        out_pileups = [os.path.join(out_dir, pile) for pile in pileup_base_names]
 
     # if out dir doesnt exist make it
-    os.makedirs(out_dir,exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
 
     # give all summary pileups the same sumamry
-    summary_filename=[summary_filename]*(len(pileups_names))
+    summary_filename = [summary_filename] * (len(pileups_names))
 
     const_tag = args['--tag']
     summarise_only = args['--summarise_only']
