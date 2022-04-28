@@ -17,6 +17,14 @@ Options:
 
 """
 
+
+##############################################################################################################################
+# Author:  Roni Haas
+# Main Goal: This script filters a list of pileup files so that they only contain sites covered in more than a given
+# percent of the pileup files.
+##############################################################################################################################
+
+
 from Utility.generators_utilities import class_generator
 from Utility.parallel_generator import parallel_generator
 from Utility.Pileup_class import Pileup_line

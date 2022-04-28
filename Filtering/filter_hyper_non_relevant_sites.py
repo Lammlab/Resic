@@ -2,9 +2,12 @@
 
 ##############################################################################################################################
 # Author:  Roni Haas
-# Main goal: Takes several pileup files and for each one prints to a new file only unique sites (that is, only sites that are
-# not in any of the other pileup files
+# Main Goal: Due to the Resic algorithm, it is possible for a non-hyper editing site to be identified as a hyper editing site.
+# Namely, for every two distinct nucleotides X and Y under the 3nt genome scheme, nucleotide mismatches other than hyper
+# X to Y or Y to X may be recorded, due to conditions created by the 3nt scheme. 
+# Therefore, this script is needed to filter the hyper editing files to include only X -> Y or Y -> X changes.
 ##############################################################################################################################
+
 from Utility.generators_utilities import class_generator
 from Utility.parallel_generator import parallel_generator
 from Utility.Pileup_class import Pileup_line
@@ -21,8 +24,7 @@ def get_candidate_nucl(pileup_line):
     sense_string = clean_str.replace('^','')
     sense_string = clean_str.replace('$','')
     sense_string = clean_str.replace(',','.')
-    # TODO before use assumed letters are only upper case. I fix this assumption here
-    #sense_string_upper = sense_string.upper()
+
     # Find the candidate nucleotide reads
     nucl_changes = {"A": 0, "C": 0, "G": 0, "T": 0, "a": 0, "c": 0, "g": 0, "t": 0}
     for nucl in list(sense_string):
@@ -55,6 +57,7 @@ def filter_for_specific_node_XtoY_editing_sites(pileup_file, node_name):
                     new_pileup.write(str(line))
 
     return pileup_file
+
 
 def filter_hyper_non_relevant_editing_sites(pileup_filename_list):
     for file in pileup_filename_list:

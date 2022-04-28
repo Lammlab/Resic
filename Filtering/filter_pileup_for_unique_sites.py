@@ -3,7 +3,7 @@
 ##############################################################################################################################
 # Author:  Roni Haas
 # Main goal: Takes several pileup files and for each one prints to a new file only unique sites (that is, only sites that are
-# not in any of the other pileup files
+# not in any of the other pileup files)
 ##############################################################################################################################
 
 from docopt import docopt

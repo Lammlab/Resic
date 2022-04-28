@@ -1,12 +1,5 @@
 """filter_pileup_by_existing_snp.py
 
-The script receives pileup file, cns file(/pileup file) and an output filename.
-it filter out the lines from the pileup file that overlapped with the cns file if there
-was a change in the read string (one at least of atcgATCG and the other IUPAC nucleotide code in the reads string ) of the cns file.
-by defult it keeps the lines that didnt overlap, if flag --rm-non-overlapping is added
-it filter those lines out.
-
-
 Usage:
     snprationotincs.py param
     snprationotincs.py example
@@ -21,6 +14,17 @@ Options:
 
 
 # the cns_file arg can be a pileup file or a Bsortedcns file #
+
+##############################################################################################################################
+# Author:  Roni Haas
+# Main Goal: This script receives pileup file, cns file(/pileup file) and an output filename.
+# It filters out the lines from the pileup file that overlap with the cns file, if there was a change in the 
+# read string (one at least of atcgATCG and the other IUPAC nucleotide code in the reads string ) of the cns file.
+# By defult, it keeps the lines that did not overlap; However, if the flag --rm-non-overlapping is added to the run,
+# it filters out the lines that did not overlap.
+##############################################################################################################################
+
+
 
 from Utility.parallel_generator import *
 from Utility.Pileup_class import Pileup_line
