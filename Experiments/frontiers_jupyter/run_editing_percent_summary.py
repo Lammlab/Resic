@@ -3,69 +3,41 @@ To run resic all you need to do is to edit the real_pipe function (below) and ru
 """
 
 import logging
-import unittest
 import os
-from os import listdir
-from os.path import isfile, join, isdir
 import shutil
-from Processing.merge_sams import merge_sams
-import Filtering.filter_ambiguous_reads as filter_read
-from Filtering.filter_pileup_for_unique_sites import write_unique_sites
-from Filtering.filter_hyper_non_relevant_sites import filter_hyper_non_relevant_editing_sites
-import plotly
-from tkinter import filedialog
 import itertools
-import subprocess
-from functools import partial
 import Processing.include_exclude_alignment as in_ex_align
-import Processing.genome_3nt as genome_3nt
-from Processing.analyze_editing_percent import filter_pileup_by_categories,analyse_multiple_editing_percent_files
-from Processing.pileup_sorting import pileup_sort
-from Filtering.filter_pileup_by_multiple_existing_snps import snp_algebra, snp_detect, snp_algebra_from_vcf_file
-from Filtering.filter_pileup_by_consensus_site import filter_by_consensus
-from Experiments.forontiers_jupyter.site_loss_by_group_plot import site_loss_by_group_plot
-from Experiments.forontiers_jupyter.editing_type_count_by_group_plot import editing_type_count_by_group_plot
-
-from Experiments.forontiers_jupyter.pipe_utils import all_genome_pair_combinations\
-    , genome_3nt_all_combination_spec,print_structure,transcriptom_func,genome_3nt_factory
-
-from Experiments.forontiers_jupyter.directory_structure_definer import\
-    DirectoryStructure,Stages,AlignStage,PileupStage,ConcensusStage,SiteLossStage,EditTypeStage
-from PIL import Image
-from Experiments.forontiers_jupyter.parallel_commands import parallel_commands
-from Experiments.forontiers_jupyter.aligner_wrapper import AlignerWrapper
-from Utility.multiline_sort import multiline_sort_pileup, multiline_sort
-from Utility.Pileup_class import Pileup_line
-from Utility.generators_utilities import class_generator
-from Utility.parallel_generator import parallel_generator
-from random import randint
-from Experiments.forontiers_jupyter.editing_type_count_by_group_plot import editing_site_count_per_type
+from Processing.analyze_editing_percent import analyse_multiple_editing_percent_files
+from Experiments.frontiers_jupyter.pipe_utils import all_genome_pair_combinations, genome_3nt_all_combination_spec
+from Experiments.frontiers_jupyter.directory_structure_definer import \
+    DirectoryStructure, Stages, ConcensusStage, EditTypeStage
 
 global_list_colors = ['#d12325', '#7C00BE', '#55E5D8', '#41C109', '#DEF407', '#9F3A7D', '#3C2C0D', '#089E4C', '#F69804',
-                      '#2482BD', '#A0A269', '#CC1D74', '#1DA6CC', '#d6adc6', '#018439', '#3939a7','#37462a', '#11dacd',
-                       '#ab6b5f', '#1eb1cf', '#1a48a7']
+                      '#2482BD', '#A0A269', '#CC1D74', '#1DA6CC', '#d6adc6', '#018439', '#3939a7', '#37462a', '#11dacd',
+                      '#ab6b5f', '#1eb1cf', '#1a48a7']
+
 
 class PipeTester():
-    '''
-    @param@ snp_database: list of file locations of snp database(s) in vcf format 
-    '''
-    def __init__(self,root_dir, positive_fastqs, negative_fastqs, fasta, graph_dict, spec_dict, group_dict, aligner, 
-        parallel_limit, Disable_parallel, skip_existing_files=False, snp_database=[]):
-        self.root_dir=root_dir
-        self.positive_fastqs=positive_fastqs
-        self.negative_fastqs=negative_fastqs
-        self.snp_database = snp_database
-        self.fasta=fasta
-        self.graph_dict=graph_dict
-        self.spec_dict=spec_dict
-        self.group_dict=group_dict
-        self.aligner=aligner
-        self.parallel_limit=parallel_limit
-        self.Disable_parallel=Disable_parallel
-        self.skip_existing_files=skip_existing_files
-        #create directory structure
-        self.dirstruct=DirectoryStructure(root_dir)
+    """
+    @param@ snp_database: list of file locations of snp database(s) in vcf format
+    """
 
+    def __init__(self, root_dir, positive_fastqs, negative_fastqs, fasta, graph_dict, spec_dict, group_dict, aligner,
+                 parallel_limit, disable_parallel, skip_existing_files=False, snp_database=[]):
+        self.root_dir = root_dir
+        self.positive_fastqs = positive_fastqs
+        self.negative_fastqs = negative_fastqs
+        self.snp_database = snp_database
+        self.fasta = fasta
+        self.graph_dict = graph_dict
+        self.spec_dict = spec_dict
+        self.group_dict = group_dict
+        self.aligner = aligner
+        self.parallel_limit = parallel_limit
+        self.Disable_parallel = disable_parallel
+        self.skip_existing_files = skip_existing_files
+        # create directory structure
+        self.dirstruct = DirectoryStructure(root_dir)
 
     def remove_files(self):
         shutil.rmtree(self.root_dir)
@@ -81,18 +53,17 @@ class PipeTester():
     #     dirstruct = self.dirstruct
     #     skip_existing_files=self.skip_existing_files
     #     aligner=self.aligner
-        
+
     #     for fastq in positive_fastqs + negative_fastqs:
     #         try:
     #             fastq_name = fastq.split("/")[-1]
     #         except:
     #             fastq_name = fastq
-            
+
     #         temp = os.path.join(root_dir, fastq_name + "2")
     #         shutil.copyfile(fastq, temp)
     #         filter_read.extract_from_fastq(temp, fastq)
     #         os.remove(temp)
-
 
     # def include_exclude_alignment_test(self):
     #     # calling the function that run's the analysis (alignments)
@@ -105,11 +76,10 @@ class PipeTester():
     #     dirstruct = self.dirstruct
     #     skip_existing_files=self.skip_existing_files
     #     aligner=self.aligner
-        
+
     #     for fastq in positive_fastqs + negative_fastqs:
     #         in_ex_align.do_include_exclude_alignment(fastq, reference_library
     #             ,spec_dict, graph_dict, dirstruct, aligner, skip_existing_files)
-
 
     # def pileup_creation_test(self):
 
@@ -144,7 +114,7 @@ class PipeTester():
     #         merge_sams([sam_name, antisense_sam], combined_sam_name)
     #         sam_to_pileup(combined_sam_name,fasta_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name)
     #         return
-        
+
     #     commands=[]
     #     for fastq in positive_fastqs+negative_fastqs:
     #         for node in graph_dict.keys():
@@ -170,10 +140,10 @@ class PipeTester():
     #                 else:
     #                     logging.info(f"SKIP pileup creation for file {sam_name}, file was not created")
     #                     continue
-                
+
     #             commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     # def filter_nochange_test(self):
     #     reference_library = self.fasta
@@ -205,7 +175,7 @@ class PipeTester():
     #             command=[filter_no_change,pileup_name,filtered_pileup_name]
     #             commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     # def filter_readthreshold_test(self, threshold=1):
 
@@ -237,7 +207,7 @@ class PipeTester():
     #             command=[filter_by_threshold,pileup_name,filtered_pileup_name,threshold]
     #             commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     # def snp_removal_test(self):
 
@@ -250,8 +220,6 @@ class PipeTester():
     #     dirstruct = self.dirstruct
     #     skip_existing_files=self.skip_existing_files
 
-        
-        
     #      # all negative pileups from all nodes
     #     negative_pileups=[dirstruct.pathName(neg,node,Stages.pileup_generation,PileupStage.sorted_pileup) \
     #                              for neg in negative_fastqs for node in graph_dict.keys()]
@@ -264,12 +232,11 @@ class PipeTester():
     #     #neg_obj_list = [open(p) for p in negative_pileups]
     #     neg_gen_list = []
     #     get_pos_and_id = lambda x: (x.reference_id, x.gene_pos)
-                    
-                    
+
     #     not_snp_database = True
     #     if snp_database != []:
     #         not_snp_database = False
-            
+
     #     if not_snp_database:
     #         #filter out bad lines from negatives
     #         filtered_negatives = self.root_dir +"/" +"ALL_NEGATIVES_UNFILTERED.pileup"
@@ -283,15 +250,14 @@ class PipeTester():
     #                     if pileup_list is not None:
     #                        if pileup_list[0].is_with_any_change():
     #                             snp = True
-                                
+
     #                             break
     #                 if not snp:
     #                     line_to_write = next(item for item in parallel_line_list if item is not None)
     #                     out.write(str(line_to_write[0]) + "\n")
     #         for obj in neg_obj_list:
     #             obj.close()
-        
-                
+
     #     commands=[]
     #     for fastq in positive_fastqs:
     #         for node in graph_dict.keys():
@@ -313,44 +279,41 @@ class PipeTester():
     #             else:
     #                 command=[snp_algebra_from_vcf_file,pileup_name,snp_database[0],filtered_pileup_name,True]
     #             commands.append(command)
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
-
-        
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     #             # snp algebre interface is (pos,neg_list,snp_detector_func,out_put_name,is_input_sorted)
-        
-        
-    def editing_percent_test(self, editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2):
 
-        reference_library = self.fasta
-        positive_fastqs = self.positive_fastqs
-        spec_dict = self.spec_dict
-        graph_dict = self.graph_dict
-        dirstruct = self.dirstruct
-        skip_existing_files=self.skip_existing_files
+    # def editing_percent_test(self, editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2):
 
-        def filter_editperc(pileup, filtered_pileup, edit_min_thresh, edit_max_thresh, noise_thresh):
-            filter_pileup_by_categories(pileup,filtered_pileup, None, None, edit_min_thresh, edit_max_thresh ,noise_thresh, editing_read_thresh)
-            return
+    #     reference_library = self.fasta
+    #     positive_fastqs = self.positive_fastqs
+    #     spec_dict = self.spec_dict
+    #     graph_dict = self.graph_dict
+    #     dirstruct = self.dirstruct
+    #     skip_existing_files=self.skip_existing_files
 
-        commands=[]
-        for fastq in positive_fastqs:
-            for node in graph_dict.keys():
-                pileup_name=            dirstruct.pathName(fastq,node,Stages.snp_removal,need_suffix=True)
-                filtered_pileup_name=   dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True)
+    #     def filter_editperc(pileup, filtered_pileup, edit_min_thresh, edit_max_thresh, noise_thresh):
+    #         filter_pileup_by_categories(pileup,filtered_pileup, None, None, edit_min_thresh, edit_max_thresh ,noise_thresh, editing_read_thresh)
+    #         return
 
-                if skip_existing_files and os.path.isfile(filtered_pileup_name):
-                    logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {filtered_pileup_name} already exists")
-                    continue
-                # Todo: I added this if:
-                if not os.path.isfile(pileup_name):
-                    logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {pileup_name} does not exist / was not created")
-                    continue
+    #     commands=[]
+    #     for fastq in positive_fastqs:
+    #         for node in graph_dict.keys():
+    #             pileup_name=            dirstruct.pathName(fastq,node,Stages.snp_removal,need_suffix=True)
+    #             filtered_pileup_name=   dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True)
 
-                command=[filter_editperc, pileup_name, filtered_pileup_name, editing_min_threshold, editing_max_threshold, noise_threshold]
-                commands.append(command)
+    #             if skip_existing_files and os.path.isfile(filtered_pileup_name):
+    #                 logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {filtered_pileup_name} already exists")
+    #                 continue
+    #             # Todo: I added this if:
+    #             if not os.path.isfile(pileup_name):
+    #                 logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {pileup_name} does not exist / was not created")
+    #                 continue
 
-        parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #             command=[filter_editperc, pileup_name, filtered_pileup_name, editing_min_threshold, editing_max_threshold, noise_threshold]
+    #             commands.append(command)
+
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     # def hyper_non_relevant_editing_site_test(self):
     #     reference_library = self.fasta
@@ -387,7 +350,6 @@ class PipeTester():
     #             pileup_files_from_all_nodes.append(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True))
     #         write_unique_sites(pileup_files_from_all_nodes, sorted_input=True)
 
-
     # def concensus_test(self,consensus_threshold=0.5):
 
     #     reference_library = self.fasta
@@ -414,7 +376,7 @@ class PipeTester():
     #         command=[filter_by_consensus,pileups,consensus_threshold,filtered_pileups,concensus_pileup,True]
     #         commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
     # def site_loss_plot_test(self):
 
@@ -434,32 +396,35 @@ class PipeTester():
     #         command=[site_loss_by_group_plot,fastq,node_names,group_dict,dirstruct,dict_colors]
     #         commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
-    # def editing_percent_plot_generate_summaries(self, editing_min_thresh=0, editing_max_thresh=100, noise_thresh=1, read_thresh=2):
+    def editing_percent_plot_generate_summaries(self, editing_min_thresh=0, editing_max_thresh=100, noise_thresh=1,
+                                                read_thresh=2):
+        reference_library = self.fasta
+        positive_fastqs = self.positive_fastqs
+        spec_dict = self.spec_dict
+        graph_dict = self.graph_dict
+        dirstruct = self.dirstruct
+        skip_existing_files = self.skip_existing_files
+        group_dict = self.group_dict
 
-    #     reference_library = self.fasta
-    #     positive_fastqs = self.positive_fastqs
-    #     spec_dict = self.spec_dict
-    #     graph_dict = self.graph_dict
-    #     dirstruct = self.dirstruct
-    #     skip_existing_files=self.skip_existing_files
-    #     group_dict=self.group_dict
+        nodes = list(graph_dict.keys())
+        # calculate editing percent and editing site distribution summary for each lib and node
+        in_pileups = [dirstruct.pathName(fastq, node, Stages.concensus, ConcensusStage.filtered) for node, fastq
+                      in itertools.product(nodes, positive_fastqs)]
+        out_pileups = [dirstruct.pathName(fastq, node, Stages.editing_type_count, EditTypeStage.edit_percent_pileup) for
+                       node, fastq
+                       in itertools.product(nodes, positive_fastqs)]
+        out_summaries = [dirstruct.pathName(fastq, node, Stages.editing_type_count, EditTypeStage.file_summary) for
+                         node, fastq
+                         in itertools.product(nodes, positive_fastqs)]
 
-    #     nodes=list(graph_dict.keys())
-    #     # calculate editing percent and editing site distribution summary for each lib and node
-    #     in_pileups=[dirstruct.pathName(fastq,node,Stages.concensus,ConcensusStage.filtered) for node,fastq
-    #                 in itertools.product(nodes,positive_fastqs) ]
-    #     out_pileups=[dirstruct.pathName(fastq,node,Stages.editing_type_count,EditTypeStage.edit_percent_pileup) for node,fastq
-    #                 in itertools.product(nodes, positive_fastqs)]
-    #     out_summaries=[dirstruct.pathName(fastq,node,Stages.editing_type_count,EditTypeStage.file_summary) for node,fastq
-    #                 in itertools.product(nodes, positive_fastqs)]
-
-
-    #     analyse_multiple_editing_percent_files(in_pileups, out_pileups, out_summaries, total_summary_file=None,
-    #                      add_headers=True, summary_only=False, min_editing=editing_min_thresh, max_editing=editing_max_thresh,
-    #                      max_noise=noise_thresh, min_reads=read_thresh, edit_tag='edited', parallel_limit=self.parallel_limit,
-    #                      Disable_parallel=self.Disable_parallel)
+        analyse_multiple_editing_percent_files(in_pileups, out_pileups, out_summaries, total_summary_file=None,
+                                               add_headers=True, summary_only=False, min_editing=editing_min_thresh,
+                                               max_editing=editing_max_thresh,
+                                               max_noise=noise_thresh, min_reads=read_thresh, edit_tag='edited',
+                                               parallel_limit=self.parallel_limit,
+                                               Disable_parallel=self.Disable_parallel)
 
     # def editing_percent_plot_generate_plot(self):
     #     reference_library = self.fasta
@@ -479,15 +444,13 @@ class PipeTester():
     #         command = [editing_type_count_by_group_plot,fastq,group_dict,dirstruct,dict_colors]
     #         commands.append(command)
 
-    #     parallel_commands(commands,parallel_limit=self.parallel_limit,Disable_parallel=self.Disable_parallel)
-
+    #     parallel_commands(commands,parallel_limit=self.parallel_limit,disable_parallel=self.disable_parallel)
 
 
 def Resic_graph_config(bowtie_parrallel=1):
+    aligner = in_ex_align.bowtie_wrapper
 
-    aligner=in_ex_align.bowtie_wrapper
-
-    norep_align = f" -p {bowtie_parrallel} -m 2 -l 50 -n 3 --chunkmbs 200 --strata --best" 
+    norep_align = f" -p {bowtie_parrallel} -m 2 -l 50 -n 3 --chunkmbs 200 --strata --best"
     repetative_align = f" -p {bowtie_parrallel} -m 20 -l 50 -n 3 --chunkmbs 200 --strata --best --max reads_exceeding_the_-m_limit.fastq"
     logging.error(f"{norep_align}")
 
@@ -503,7 +466,6 @@ def Resic_graph_config(bowtie_parrallel=1):
 
     for base_pairs_name, pre, post in genome_3nt_all_combination_spec():
         spec_dict["rep_hyper_" + base_pairs_name] = (repetative_align, pre, post)
-
 
     # generate empty dict
     graph_dict = {name: [] for name in spec_dict.keys()}
@@ -535,7 +497,7 @@ def Resic_graph_config(bowtie_parrallel=1):
         "norep_hyper": {"norep_hyper_" + "_".join(name) for name in all_genome_pair_combinations()},
         "rep_hyper": {"rep_hyper_" + "_".join(name) for name in all_genome_pair_combinations()},
     }
-    return aligner,spec_dict,graph_dict,group_dict
+    return aligner, spec_dict, graph_dict, group_dict
 
 
 # def naive_3nt_graph_config():
@@ -604,7 +566,7 @@ def real_pipe():
 
     # this option reverse the negative and positive fastq samples. It is used for quality control
     # do NOT change it for a regular run.
-    reverse=False
+    reverse = False
 
     # the output directory 
     root_dir = "/Data2/users/clara/resic_split/root_dir"
@@ -619,35 +581,33 @@ def real_pipe():
     reference_library = "/Data2/reference_genomes/ws220/ws220-allchro_with_chr_M.fasta"
 
     # a list of fastq sample names for which you want to detect editing sites
-    positive_fastqs = ['N2_E_27_Orna_illumina_rep_1.united.fastq.collapsed','N2_E_27_Orna_illumina_rep_2.united.fastq.collapsed']
+    positive_fastqs = ['N2_E_27_Orna_illumina_rep_1.united.fastq.collapsed',
+                       'N2_E_27_Orna_illumina_rep_2.united.fastq.collapsed']
 
     # Optional-  a list of fastq sample names that will be used to exclude non-editing sites.
     # these can be DNA reads or mutant strains that are lacking the editing mechanism.               
-    negative_fastqs = ['BB21_E_27_Orna_illumina.united.fastq.collapsed','BB21_E_29_Alla_illumina.united.fastq.collapsed']
+    negative_fastqs = ['BB21_E_27_Orna_illumina.united.fastq.collapsed',
+                       'BB21_E_29_Alla_illumina.united.fastq.collapsed']
 
     # Optional - a dbSNP vcf file, currently WITH NO HEADERS, to exclude SNPs.
     # remove all lines that start with #
     snp_database = []
 
     # Note: currently we support using either a snp database or negative files and not both at once.
-    
+
     if not os.path.exists(root_dir):
         os.makedirs(root_dir)
 
-    
-    for fastq in positive_fastqs+negative_fastqs:
+    for fastq in positive_fastqs + negative_fastqs:
         if not os.path.exists(os.path.join(root_dir, fastq)):
             shutil.copyfile(os.path.join(data_dir, fastq), os.path.join(root_dir, fastq))
-    
-    
+
     positive_fastqs = [os.path.join(root_dir, fastq) for fastq in positive_fastqs]
 
     negative_fastqs = [os.path.join(root_dir, fastq) for fastq in negative_fastqs]
-    
 
     if reverse:
-        positive_fastqs,negative_fastqs=(negative_fastqs,positive_fastqs)
-
+        positive_fastqs, negative_fastqs = (negative_fastqs, positive_fastqs)
 
     # Resic's ful graph
     aligner, spec_dict, graph_dict, group_dict = Resic_graph_config(bowtie_parrallel=12)
@@ -657,16 +617,16 @@ def real_pipe():
     # naive 3nt is non rep and rep with AG 3nt pre and post
     # aligner,spec_dict,graph_dict,group_dict=naive_3nt_graph_config()
 
-    test_pipe = PipeTester(root_dir, positive_fastqs, negative_fastqs, reference_library, 
-        graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, Disable_parallel=False,
-        skip_existing_files=True, snp_database=snp_database)
+    test_pipe = PipeTester(root_dir, positive_fastqs, negative_fastqs, reference_library,
+                           graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, disable_parallel=False,
+                           skip_existing_files=True, snp_database=snp_database)
 
     """
     You can comment function that you want to skip. All functions together creats RECIC
     Thresholds can be modified.
     """
     # comment the test_pipe.remove_files if you want to keep previous files in the output directory
-    #test_pipe.remove_files()
+    # test_pipe.remove_files()
     # test_pipe.filter_fastq()
 
     # test_pipe.include_exclude_alignment_test()
@@ -679,17 +639,18 @@ def real_pipe():
 
     # test_pipe.snp_removal_test()
 
-    test_pipe.editing_percent_test(editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2)
+    # test_pipe.editing_percent_test(editing_min_threshold=30, editing_max_threshold=99, noise_threshold=3, editing_read_thresh=2)
 
     # test_pipe.hyper_non_relevant_editing_site_test()
-    
+
     # test_pipe.unique_site_test()
 
     # test_pipe.concensus_test(consensus_threshold=0.5)
 
     # test_pipe.site_loss_plot_test()
 
-    # test_pipe.editing_percent_plot_generate_summaries(editing_min_thresh=30, editing_max_thresh=99, noise_thresh=3, read_thresh=2)
+    test_pipe.editing_percent_plot_generate_summaries(editing_min_thresh=30, editing_max_thresh=99, noise_thresh=3,
+                                                      read_thresh=2)
 
     # test_pipe.editing_percent_plot_generate_plot()
 

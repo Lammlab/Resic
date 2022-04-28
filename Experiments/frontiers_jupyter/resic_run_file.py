@@ -23,23 +23,17 @@ from Processing.analyze_editing_percent import filter_pileup_by_categories,analy
 from Processing.pileup_sorting import pileup_sort
 from Filtering.filter_pileup_by_multiple_existing_snps import snp_algebra, snp_detect, snp_algebra_from_vcf_file
 from Filtering.filter_pileup_by_consensus_site import filter_by_consensus
-from Experiments.forontiers_jupyter.site_loss_by_group_plot import site_loss_by_group_plot
-from Experiments.forontiers_jupyter.editing_type_count_by_group_plot import editing_type_count_by_group_plot
+from Experiments.frontiers_jupyter.site_loss_by_group_plot import site_loss_by_group_plot
+from Experiments.frontiers_jupyter.editing_type_count_by_group_plot import editing_type_count_by_group_plot
 
-from Experiments.forontiers_jupyter.pipe_utils import all_genome_pair_combinations\
+from Experiments.frontiers_jupyter.pipe_utils import all_genome_pair_combinations\
     , genome_3nt_all_combination_spec,print_structure,transcriptom_func,genome_3nt_factory
-
-from Experiments.forontiers_jupyter.directory_structure_definer import\
-    DirectoryStructure,Stages,AlignStage,PileupStage,ConcensusStage,SiteLossStage,EditTypeStage
-from PIL import Image
-from Experiments.forontiers_jupyter.parallel_commands import parallel_commands
-from Experiments.forontiers_jupyter.aligner_wrapper import AlignerWrapper
-from Utility.multiline_sort import multiline_sort_pileup, multiline_sort
+from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure, Stages, AlignStage,PileupStage,ConcensusStage, EditTypeStage
+from Experiments.frontiers_jupyter.parallel_commands import parallel_commands
 from Utility.Pileup_class import Pileup_line
 from Utility.generators_utilities import class_generator
 from Utility.parallel_generator import parallel_generator
-from random import randint
-from Experiments.forontiers_jupyter.editing_type_count_by_group_plot import editing_site_count_per_type
+from Experiments.frontiers_jupyter.editing_type_count_by_group_plot import editing_site_count_per_type
 
 global_list_colors = ['#d12325', '#7C00BE', '#55E5D8', '#41C109', '#DEF407', '#9F3A7D', '#3C2C0D', '#089E4C', '#F69804',
                       '#2482BD', '#A0A269', '#CC1D74', '#1DA6CC', '#d6adc6', '#018439', '#3939a7','#37462a', '#11dacd',
@@ -122,11 +116,17 @@ class PipeTester():
         skip_existing_files=self.skip_existing_files
 
         def sam_to_pileup(sam_name,fasta_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name):
-            command=(   f"oldsamtools view -bS {sam_name} > {bam_name} && " +
-                        f"oldsamtools sort {bam_name} {sorted_bam_name} && " +
-                        f"oldsamtools mpileup -f {fasta_name} {sorted_bam_name}.bam > {pileup_name} &&" + #| tail -n +3 
-                        f"sed -r '/^[\t]*$/d' <{pileup_name} | sort -k1,1 -k2,2n -o {sorted_pileup_name} "
-                        )
+            # TODO: changed this:
+            # command=(   f"oldsamtools view -bS {sam_name} > {bam_name} && " +
+            #             f"oldsamtools sort {bam_name} {sorted_bam_name} && " +
+            #             f"oldsamtools mpileup -f {fasta_name} {sorted_bam_name}.bam > {pileup_name} &&" + #| tail -n +3 
+            #             f"sed -r '/^[\t]*$/d' <{pileup_name} | sort -k1,1 -k2,2n -o {sorted_pileup_name} "
+            #             )
+            command=(   f"samtools view -bS {sam_name} > {bam_name} && " +
+            f"samtools sort -o {sorted_bam_name} {bam_name} && " +
+            f"samtools mpileup -f {fasta_name} {sorted_bam_name} > {pileup_name} &&" + #| tail -n +3 
+            f"sed -r '/^[\t]*$/d' <{pileup_name} | sort -k1,1 -k2,2n -o {sorted_pileup_name} "
+            )
             try:
                 outout=subprocess.check_output(command,shell=True)
             except subprocess.CalledProcessError as e:
@@ -154,10 +154,16 @@ class PipeTester():
                 if skip_existing_files and os.path.isfile(sorted_pileup_name):
                     logging.info(f"SKIP pileup creation for file {sam_name} since {sorted_pileup_name} already exists")
                     continue
-                if node == "norep" or node == "rep":
+                # TODO: I added this if 10.10
+                #if node == "norep" or node == "rep":
+                if os.path.isfile(sam_name) and (node == "norep" or node == "rep"):
                     command=[sam_to_pileup,sam_name,fasta,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name]
                 else:
-                    command=[sams_to_pileup,fasta,sam_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name,antisense_sam,combined_sam_name]
+                    if (node != "norep" and node != "rep") and os.path.isfile(antisense_sam) and os.path.isfile(sam_name):
+                        command=[sams_to_pileup,fasta,sam_name,bam_name,sorted_bam_name,pileup_name,sorted_pileup_name,antisense_sam,combined_sam_name]
+                    else:
+                        logging.info(f"SKIP pileup creation for file {sam_name}, file was not created")
+                        continue
                 
                 commands.append(command)
 
@@ -183,6 +189,11 @@ class PipeTester():
 
                 if skip_existing_files and os.path.isfile(filtered_pileup_name):
                     logging.info(f"SKIP pileup no change filtering for file {pileup_name} since {filtered_pileup_name} already exists")
+                    continue
+
+                # Todo I added this:
+                if not os.path.isfile(pileup_name):
+                    logging.info(f"SKIP pileup no change filtering for file {pileup_name} since {pileup_name} was not created / does not exist")
                     continue
 
                 command=[filter_no_change,pileup_name,filtered_pileup_name]
@@ -212,6 +223,10 @@ class PipeTester():
                 if skip_existing_files and os.path.isfile(filtered_pileup_name):
                     logging.info(f"SKIP pileup read threshold filtering for file {pileup_name} since {filtered_pileup_name} already exists")
                     continue
+                # Todo: I added this:
+                if not os.path.isfile(pileup_name):
+                    logging.info(f"SKIP pileup read threshold filtering for file {pileup_name} since {pileup_name} does not exist / was not created")
+                    continue
 
                 command=[filter_by_threshold,pileup_name,filtered_pileup_name,threshold]
                 commands.append(command)
@@ -237,7 +252,10 @@ class PipeTester():
 
         #combine all negatives into single filtered negative, to save runtime in snp_removal
         #parameters for parallel generator
-        neg_obj_list = [open(p) for p in negative_pileups]
+
+        # TODO: I added the if:
+        neg_obj_list = [open(p) for p in negative_pileups if os.path.isfile(p)]
+        #neg_obj_list = [open(p) for p in negative_pileups]
         neg_gen_list = []
         get_pos_and_id = lambda x: (x.reference_id, x.gene_pos)
                     
@@ -278,6 +296,11 @@ class PipeTester():
                     logging.info(f"SKIP pileup snp removal filtering for file {pileup_name} since {filtered_pileup_name} already exists")
                     continue
 
+                # TODO: I added this:
+                if not os.path.isfile(pileup_name):
+                    logging.info(f"SKIP pileup snp removal filtering for file {pileup_name} since {pileup_name} doesn't exist / was not created")
+                    continue
+
                 # snp algebre interface is (pos,neg_list,snp_detector_func,out_put_name,is_input_sorted,not_snp_database)
                 if not_snp_database:
                     command=[snp_algebra,pileup_name,[filtered_negatives],snp_detect,filtered_pileup_name,True, False]
@@ -313,7 +336,10 @@ class PipeTester():
                 if skip_existing_files and os.path.isfile(filtered_pileup_name):
                     logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {filtered_pileup_name} already exists")
                     continue
-
+                # Todo: I added this if:
+                if not os.path.isfile(pileup_name):
+                    logging.info(f"SKIP pileup editing percent filtering for file {pileup_name} since {pileup_name} does not exist / was not created")
+                    continue
 
                 command=[filter_editperc, pileup_name, filtered_pileup_name, editing_min_threshold, editing_max_threshold, noise_threshold]
                 commands.append(command)
@@ -331,7 +357,13 @@ class PipeTester():
         all_pileup_files_from_last_stage = []
         for fastq in positive_fastqs:
             for node in graph_dict.keys():
-                all_pileup_files_from_last_stage.append(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True))
+                #all_pileup_files_from_last_stage.append(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True))
+                # Todo: I added this if:
+                if os.path.isfile(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True)):
+                    all_pileup_files_from_last_stage.append(dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True))
+                else:
+                    logging.info(f"SKIP pileup hyper non-relevant filtering for file {dirstruct.pathName(fastq,node,Stages.editing_percent,need_suffix=True)} since this file does not exist / was not created")
+
         filter_hyper_non_relevant_editing_sites(all_pileup_files_from_last_stage)
 
     def unique_site_test(self):
@@ -569,23 +601,23 @@ def real_pipe():
     reverse=False
 
     # the output directory 
-    root_dir = ""
+    root_dir = "/Data2/users/clara/resic_split/root_dir"
 
     # no need to add a path for a regular run.
     if reverse:
         root_dir += ""
 
     # the directory in which the fastq input files are located
-    data_dir = ""
+    data_dir =  "/Data2/users/clara/resic_fix/root_dir"
     # a path to a fasta file to use as a reference genome (either indexed or not indexed)
-    reference_library = ""
+    reference_library = "/Data2/reference_genomes/ws220/ws220-allchro_with_chr_M.fasta"
 
     # a list of fastq sample names for which you want to detect editing sites
-    positive_fastqs = []
+    positive_fastqs = ['N2_E_27_Orna_illumina_rep_1.united.fastq.collapsed','N2_E_27_Orna_illumina_rep_2.united.fastq.collapsed']
 
     # Optional-  a list of fastq sample names that will be used to exclude non-editing sites.
     # these can be DNA reads or mutant strains that are lacking the editing mechanism.               
-    negative_fastqs = []
+    negative_fastqs = ['BB21_E_27_Orna_illumina.united.fastq.collapsed','BB21_E_29_Alla_illumina.united.fastq.collapsed']
 
     # Optional - a dbSNP vcf file, currently WITH NO HEADERS, to exclude SNPs.
     # remove all lines that start with #
@@ -628,7 +660,7 @@ def real_pipe():
     Thresholds can be modified.
     """
     # comment the test_pipe.remove_files if you want to keep previous files in the output directory
-    test_pipe.remove_files()
+    #test_pipe.remove_files()
     test_pipe.filter_fastq()
 
     test_pipe.include_exclude_alignment_test()

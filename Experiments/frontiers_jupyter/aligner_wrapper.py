@@ -1,13 +1,8 @@
-import Utility.threading_tree_utils
 import subprocess
 import re
 import os
-import sys
 import shutil
 from contextlib import nullcontext
-import logging
-import  sys
-import doctest
 
 class AlignerWrapper:
     """
@@ -198,9 +193,11 @@ class FormatStringError(AlignerWraperError):
         pass
     pass
 
+
 if __name__ == '__main__':
-    #doctest.testmod()
-    main()
+    pass
+    # doctest.testmod()
+    # main()
 
 
 '''

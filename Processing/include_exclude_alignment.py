@@ -11,8 +11,8 @@ import re
 import logging
 import Utility
 from contextlib import nullcontext
-from Experiments.forontiers_jupyter.directory_structure_definer import DirectoryStructure ,Stages,AlignStage
-from Experiments.forontiers_jupyter.aligner_wrapper import AlignerWrapper
+from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure ,Stages,AlignStage
+from Experiments.frontiers_jupyter.aligner_wrapper import AlignerWrapper
 from Processing.genome_3nt import complement_multiline, flip_sam_flags, reverse_multiline
 
 Fathers_list = List[str]

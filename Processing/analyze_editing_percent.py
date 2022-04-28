@@ -28,7 +28,7 @@ from docopt import docopt
 import sys
 import subprocess
 from Utility.logger_utils import get_Pipes_dir
-from Experiments.forontiers_jupyter.parallel_commands import parallel_commands
+from Experiments.frontiers_jupyter.parallel_commands import parallel_commands
 
 
 def is_pileup_line_edited(pileup_line: Pileup_line, read_thresh_hold=1, editing_min_percent_threshold=0.,
