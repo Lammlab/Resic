@@ -11,7 +11,6 @@ Options:
             
 """
 
-
 ##############################################################################################################################
 # Author:  Roni Haas
 # Refactored by: Clara Frydman
@@ -33,22 +32,20 @@ class IllegalArgument(Exception):
         return self.message
 
 
-def filter_pileup_by_reference_base_set(pileup,output,listBases):
+def filter_pileup_by_reference_base_set(pileup, output, listBases):
     """
     :param pileup:  the pile up we want to filter
     :param listBases: a list of ref bases we want to filter by
     :param output: the output file that will contain lines with only the bases in listBases as ref base
     """
-    with open(pileup,"r") as file1:
+    with open(pileup, "r") as file1:
         line = file1.readline()
-        with open(output,"w") as fileout:
+        with open(output, "w") as fileout:
             while line is not None and line != "":
                 lineParts = line.split()
                 if lineParts[2] in listBases:
                     fileout.write(line)
-                line=file1.readline()
-
-
+                line = file1.readline()
 
 
 def print_params():
@@ -67,8 +64,7 @@ def print_example():
     print(example_string)
 
 
-
-if __name__ == "__main__" :
+if __name__ == "__main__":
 
     args = docopt(__doc__)
 
@@ -84,8 +80,7 @@ if __name__ == "__main__" :
     output_filename = args['<output_filename>']
     reference_nucleotides = args['<reference_nucleotide>']
 
-
-    if not reference_nucleotides or reference_nucleotides==[]:
+    if not reference_nucleotides or reference_nucleotides == []:
         raise ValueError("Must be at least one nucleotide to filter by.")
 
     for reference_nucleotide in reference_nucleotides:
@@ -106,16 +101,10 @@ if __name__ == "__main__" :
 
     """
 
-    
-
-
-
-
-
     # if len(sys.argv)<3 : raise IllegalArgument
     # pileup = sys.argv[1]
     # output = sys.argv[2]
-    
+
     # numberOfBases = len(sys.argv) -3
     # if numberOfBases == 0: 
     #     raise IllegalArgument
@@ -138,7 +127,3 @@ if __name__ == "__main__" :
     #             filter_pileup_by_reference_base_set(pileup,output, [one, two])
     #     else: 
     #         filter_pileup_by_reference_base_set(pileup,output, [one])
-
-
-
-

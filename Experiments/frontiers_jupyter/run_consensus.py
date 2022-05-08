@@ -1,17 +1,21 @@
 """
-To run Resic, edit the real_pipe function (below) and run this file.
-This is the runfile for the filter_positions_by_coverage_threshold step, in which positions that are not covered by
-a certain number of reads in the positive input files are removed.
+This file is the run file for the consensus filtering step.
+This step filters out positions not present in more than a given percent of the positive input files.
+To run resic, edit the real_pipe function (below) and run this file.
 """
 
 import logging
 import os
 import shutil
 import Processing.include_exclude_alignment as in_ex_align
-from Processing.analyze_editing_percent import filter_pileup_by_categories
+from Filtering.filter_pileup_by_consensus_site import filter_by_consensus
 from Experiments.frontiers_jupyter.pipe_utils import all_genome_pair_combinations, genome_3nt_all_combination_spec
-from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure, Stages
+from Experiments.frontiers_jupyter.directory_structure_definer import DirectoryStructure, Stages, ConcensusStage
 from Experiments.frontiers_jupyter.parallel_commands import parallel_commands
+
+global_list_colors = ['#d12325', '#7C00BE', '#55E5D8', '#41C109', '#DEF407', '#9F3A7D', '#3C2C0D', '#089E4C', '#F69804',
+                      '#2482BD', '#A0A269', '#CC1D74', '#1DA6CC', '#d6adc6', '#018439', '#3939a7', '#37462a', '#11dacd',
+                      '#ab6b5f', '#1eb1cf', '#1a48a7']
 
 
 class PipeTester():
@@ -20,7 +24,7 @@ class PipeTester():
     """
 
     def __init__(self, root_dir, positive_fastqs, negative_fastqs, fasta, graph_dict, spec_dict, group_dict, aligner,
-                 parallel_limit, disable_parallel, skip_existing_files=False, snp_database=[]):
+                 parallel_limit, Disable_parallel, skip_existing_files=False, snp_database=[]):
         self.root_dir = root_dir
         self.positive_fastqs = positive_fastqs
         self.negative_fastqs = negative_fastqs
@@ -31,7 +35,7 @@ class PipeTester():
         self.group_dict = group_dict
         self.aligner = aligner
         self.parallel_limit = parallel_limit
-        self.disable_parallel = disable_parallel
+        self.disable_parallel = Disable_parallel
         self.skip_existing_files = skip_existing_files
         # create directory structure
         self.dirstruct = DirectoryStructure(root_dir)
@@ -40,8 +44,7 @@ class PipeTester():
         shutil.rmtree(self.root_dir)
 
 
-
-    def filter_readthreshold_test(self, threshold=1):
+    def concensus_test(self, consensus_threshold=0.5):
 
         reference_library = self.fasta
         positive_fastqs = self.positive_fastqs
@@ -50,28 +53,22 @@ class PipeTester():
         dirstruct = self.dirstruct
         skip_existing_files = self.skip_existing_files
 
-        def filter_by_threshold(pileup, filtered_pileup, thresh):
-            filter_pileup_by_categories(pileup, filtered_pileup, thresh, None, None, None)
-            return
-
         commands = []
-        for fastq in positive_fastqs:
-            for node in graph_dict.keys():
-                pileup_name = dirstruct.pathName(fastq, node, Stages.no_change, need_suffix=True)
-                filtered_pileup_name = dirstruct.pathName(fastq, node, Stages.read_threshold, need_suffix=True)
+        for node in graph_dict.keys():
+            pileups = [dirstruct.pathName(fastq, node, Stages.editing_percent_unique) for fastq in positive_fastqs]
+            filtered_pileups = [dirstruct.pathName(fastq, node, Stages.consensus, ConcensusStage.filtered) for fastq in
+                                positive_fastqs]
+            concensus_pileup = dirstruct.pathName(None, node, Stages.consensus, ConcensusStage.concensus)
 
-                if skip_existing_files and os.path.isfile(filtered_pileup_name):
-                    logging.info(
-                        f"SKIP pileup read threshold filtering for file {pileup_name} since {filtered_pileup_name} already exists")
-                    continue
-                # Todo: I added this:
-                if not os.path.isfile(pileup_name):
-                    logging.info(
-                        f"SKIP pileup read threshold filtering for file {pileup_name} since {pileup_name} does not exist / was not created")
-                    continue
+            if skip_existing_files and \
+                    all([os.path.isfile(file) for file in filtered_pileups + [concensus_pileup]]):
+                logging.info(
+                    f"SKIP pileup concensus filtering for file {node} since {filtered_pileups + [concensus_pileup]} already exists")
+                continue
 
-                command = [filter_by_threshold, pileup_name, filtered_pileup_name, threshold]
-                commands.append(command)
+            # format for filter by consensus is (in_pileups,thresh,out_pileups,concensus_pileup,is_sorted)
+            command = [filter_by_consensus, pileups, consensus_threshold, filtered_pileups, concensus_pileup, True]
+            commands.append(command)
 
         parallel_commands(commands, parallel_limit=self.parallel_limit, disable_parallel=self.disable_parallel)
 
@@ -127,6 +124,7 @@ def Resic_graph_config(bowtie_parrallel=1):
         "rep_hyper": {"rep_hyper_" + "_".join(name) for name in all_genome_pair_combinations()},
     }
     return aligner, spec_dict, graph_dict, group_dict
+
 
 
 def real_pipe():
@@ -187,7 +185,7 @@ def real_pipe():
     # aligner,spec_dict,graph_dict,group_dict=naive_3nt_graph_config()
 
     test_pipe = PipeTester(root_dir, positive_fastqs, negative_fastqs, reference_library,
-                           graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, disable_parallel=False,
+                           graph_dict, spec_dict, group_dict, aligner, parallel_limit=6, Disable_parallel=False,
                            skip_existing_files=True, snp_database=snp_database)
 
     """
@@ -197,8 +195,7 @@ def real_pipe():
     # comment the test_pipe.remove_files if you want to keep previous files in the output directory
     # test_pipe.remove_files()
 
-    test_pipe.filter_readthreshold_test(threshold=2)
-
+    test_pipe.concensus_test(consensus_threshold=0.5)
 
 
 if __name__ == '__main__':

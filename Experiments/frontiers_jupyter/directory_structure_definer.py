@@ -1,6 +1,5 @@
 """
-This basically deifnes how the output directory of resic will look like.
-
+This basically defines what the output directory of RESIC will look like.
 """
 
 import os
@@ -16,7 +15,7 @@ class Stages(Enum):
     snp_removal_from_db = 6
     editing_percent = 7
     editing_percent_unique = 8
-    concensus = 9
+    consensus = 9
     site_loss = 10
     editing_type_count = 11
 
@@ -136,7 +135,7 @@ class DirectoryStructure():
         # filtering products
         elif stage in [Stages.pileup_generation, Stages.no_change,
                        Stages.read_threshold, Stages.snp_removal, Stages.snp_removal_from_db, Stages.editing_percent
-            , Stages.concensus] or \
+            , Stages.consensus] or \
                 (stage == Stages.graph_aligner and (
                         aux == AlignStage.post_sam or aux == AlignStage.antisense_post_sam)):
             dir = os.path.join(self.root_dir, 'raw_data', node_name, stage.name)
@@ -170,7 +169,7 @@ class DirectoryStructure():
             "\t\t\t -read_threshold\n" \
             "\t\t\t -snp_removal\n" \
             "\t\t\t -editing_percent\n" \
-            "\t\t\t -concensus\n" \
+            "\t\t\t -consensus\n" \
             "\t\t\t -site_loss\n" \
             "\t\t\t -editing_type_count\n" \
             "\t\t -norep_hyper_AC \n" \
@@ -182,7 +181,7 @@ class DirectoryStructure():
             "\t\t\t -read_threshold\n" \
             "\t\t\t -snp_removal\n" \
             "\t\t\t -editing_percent\n" \
-            "\t\t\t -concensus\n" \
+            "\t\t\t -consensus\n" \
             "\t\t\t -site_loss\n" \
             "\t\t\t -editing_type_count\n" \
             "\t\t -rep_hyper_AG \n" \
@@ -194,7 +193,7 @@ class DirectoryStructure():
             "\t\t\t -read_threshold\n" \
             "\t\t\t -snp_removal\n" \
             "\t\t\t -editing_percent\n" \
-            "\t\t\t -concensus\n" \
+            "\t\t\t -consensus\n" \
             "\t\t\t -site_loss\n" \
             "\t\t\t -editing_type_count\n" \
             "\t\t -rep_transcriptome_GT \n" \
@@ -206,7 +205,7 @@ class DirectoryStructure():
             "\t\t\t -read_threshold\n" \
             "\t\t\t -snp_removal\n" \
             "\t\t\t -editing_percent\n" \
-            "\t\t\t -concensus\n" \
+            "\t\t\t -consensus\n" \
             "\t\t\t -site_loss\n" \
             "\t\t\t -editing_type_count\n" \
             "\t -figures"

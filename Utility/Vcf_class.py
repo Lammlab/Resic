@@ -1,7 +1,5 @@
-from Utility.generators_utilities import getLineFromChunk
 import re
 from Utility.Annotated_Sequence_Class import Annotated_Sequence
-from copy import deepcopy
 
 
 class VcfClass(Annotated_Sequence):
@@ -16,8 +14,7 @@ class VcfClass(Annotated_Sequence):
         "INFO": 7
     }
 
-
-    def __init__(self, line , only_tags = False):
+    def __init__(self, line, only_tags=False):
         if not only_tags:
             # parsing string
             line = line.strip('\n')
@@ -30,7 +27,7 @@ class VcfClass(Annotated_Sequence):
             raw_tags = fields[8:]
             if raw_tags == [''] and len(raw_tags) == 1:
                 raw_tags = []
-        else :
+        else:
             line = line.strip('\n')
             raw_tags = re.split('[\t\n]', line)
             if raw_tags == ['']:
@@ -62,7 +59,7 @@ class VcfClass(Annotated_Sequence):
         if str(self.tags) != "":
             tags_dict = dict()
             # preparing a tags dict
-            for key,(type,value) in self.tags.dict.items():
+            for key, (type, value) in self.tags.dict.items():
                 tags_dict[key] = value
             # adding the tags requested by the list
             for item in list_tags:
@@ -72,9 +69,9 @@ class VcfClass(Annotated_Sequence):
                     fields.append("")
                 tags_dict.pop(item, None)
             # adding the misc tags
-            if len(tags_dict.values()) == 0: # if we dont have misc tags , we add empty at the end
+            if len(tags_dict.values()) == 0:  # if we dont have misc tags , we add empty at the end
                 fields.append("")
-            else :
+            else:
                 for item in tags_dict.values():
                     fields.append(item)
 
@@ -109,9 +106,8 @@ class VcfClass(Annotated_Sequence):
                 pass
         self.fields["REF"] = new_string
 
-    def is_with_any_change(self): 
+    def is_with_any_change(self):
         pass
-
 
     @property
     def clean_base_string(self):

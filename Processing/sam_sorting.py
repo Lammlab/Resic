@@ -50,7 +50,7 @@ def sam_extract_range(line):
     split_line = re.split('\t|\n', line)
     if (line[0] == "@"):
         return (str(float("-inf")), 0, 0)
-    elif (split_line[2] == "*"):  # The misaligned lines will be in the end of the output file
+    elif split_line[2] == "*":  # The misaligned lines will be in the end of the output file
         return ("~", 0, 0)
     else:
         return (split_line[2], int(split_line[3]), int(split_line[3]) + len(split_line[9]))

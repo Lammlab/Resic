@@ -1,4 +1,3 @@
-
 def parallel_generator(generators, functors):
     """
     :param generators: A list of k generators (initialized) repersenting files, 
@@ -14,7 +13,7 @@ def parallel_generator(generators, functors):
     """
 
     # Work buffer, lines that aren't in output yet reside here
-    #current_lines = [generator.__next__() if generator is not None else None for generator in generators]
+    # current_lines = [generator.__next__() if generator is not None else None for generator in generators]
     current_lines = []
     for generator in generators:
         try:
@@ -31,9 +30,8 @@ def parallel_generator(generators, functors):
     # Boolean array for which generator finished
     listOfFinished = [0 for index in range(len(generators))]
 
-
     # Actual logic
-    while (finished_files < number_of_files) :  # As long as not all files ended
+    while (finished_files < number_of_files):  # As long as not all files ended
         current_intervals = [func(line) if line is not None else None for line, func in zip(
             current_lines, functors)]  # Extracting (str,int)
 
@@ -61,7 +59,7 @@ def parallel_generator(generators, functors):
         # For each generator check if he generated an object(line) in the equivalence class,
         # If it did add the object to the output list and try to add next line
         # until he stops generating from this eq. class (else it stays None)
-        while(num_gen_curr_eq_class > 0):
+        while (num_gen_curr_eq_class > 0):
             for i in equivalence_class_indexes:
                 next_equivalence_class[i].append(current_lines[i])
                 try:
@@ -73,7 +71,7 @@ def parallel_generator(generators, functors):
                     num_gen_curr_eq_class -= 1
                     break
 
-                if(new_interval > min_interval):
+                if (new_interval > min_interval):
                     equivalence_class_indexes.remove(i)
                     num_gen_curr_eq_class -= 1
                     break

@@ -1,4 +1,3 @@
-from Utility.generators_utilities import getLineFromChunk
 import re
 from Utility.Annotated_Sequence_Class import Annotated_Sequence
 from copy import deepcopy
@@ -14,7 +13,7 @@ class Pileup_line(Annotated_Sequence):
         "quality_string": 5,
     }
 
-    def __init__(self, line , only_tags = False):
+    def __init__(self, line, only_tags=False):
         if not only_tags:
             # parsing string
             line = line.strip('\n')
@@ -27,7 +26,7 @@ class Pileup_line(Annotated_Sequence):
             raw_tags = fields[6:]
             if raw_tags == [''] and len(raw_tags) == 1:
                 raw_tags = []
-        else :
+        else:
             line = line.strip('\n')
             raw_tags = re.split('[\t\n]', line)
             if raw_tags == ['']:
@@ -67,7 +66,7 @@ class Pileup_line(Annotated_Sequence):
         if str(self.tags) != "":
             tags_dict = dict()
             # preparing a tags dict
-            for key,(type,value) in self.tags.dict.items():
+            for key, (type, value) in self.tags.dict.items():
                 tags_dict[key] = value
             # adding the tags requested by the list
             for item in list_tags:
@@ -77,9 +76,9 @@ class Pileup_line(Annotated_Sequence):
                     fields.append("")
                 tags_dict.pop(item, None)
             # adding the misc tags
-            if len(tags_dict.values()) == 0: # if we dont have misc tags , we add empty at the end
+            if len(tags_dict.values()) == 0:  # if we dont have misc tags , we add empty at the end
                 fields.append("")
-            else :
+            else:
                 for item in tags_dict.values():
                     fields.append(item)
 
@@ -117,18 +116,17 @@ class Pileup_line(Annotated_Sequence):
                 pass
         self.fields["reads_string"] = new_string
 
-    def is_with_any_change(self): 
+    def is_with_any_change(self):
 
-        #return : true if in the reads string there is one or more of a c g t A C G T , else false
-        #all the possible IUPAC nucleotide code
-        nuc_changes = ["a","c","g","t","r","y","s","w","k","m","b","d","h","v","n"]
+        # return : true if in the reads string there is one or more of a c g t A C G T , else false
+        # all the possible IUPAC nucleotide code
+        nuc_changes = ["a", "c", "g", "t", "r", "y", "s", "w", "k", "m", "b", "d", "h", "v", "n"]
         all_nuc_changes = [letter.upper() for letter in nuc_changes] + nuc_changes
 
         if any(change in self.reads() for change in all_nuc_changes):
             return True
-        else : 
+        else:
             return False
-
 
     @property
     def clean_base_string(self):

@@ -119,7 +119,7 @@ def site_loss_by_group_plot(lib_name, node_names, group_dict, dirstruct: Directo
         (Stages.read_threshold, None),
         (Stages.snp_removal, None),
         (Stages.editing_percent, None),
-        (Stages.concensus, ConcensusStage.filtered)
+        (Stages.consensus, ConcensusStage.filtered)
     ]
 
     # mapping between node,stage,aux_stage and the file that contains it

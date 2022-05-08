@@ -1,7 +1,5 @@
-
 from contextlib import contextmanager
 import multiprocessing
-
 from typing import Dict
 from typing import List
 from collections import namedtuple
@@ -14,6 +12,8 @@ Dict_specifications = Dict[Specifications, Fathers_list]
 """ this class handles the waiting of the child vertexes to thier fathers, 
 handles the dict of filenames that contains the "output" file of each step for it's children ,
 and in general handles the tree structure by the given Dict_specifications """
+
+
 class ThreadingTree:
 
     def __init__(self, dict_spec: Dict_specifications):
@@ -62,7 +62,7 @@ class ThreadingTree:
         """
         # here need to come the enter part - wait for father on the event and so on
         for spec, fathers in self.dict_tree.items():
-            if spec.id ==id_step:
+            if spec.id == id_step:
                 for father in fathers:
                     self.events_by_id_dict[father].wait()  # waiting on all fathers
 
@@ -84,7 +84,6 @@ class ThreadingTree:
             self.fasta_indexing_lock.release()
             pass
 
-    
     @contextmanager
     def secondary_locking_context(self):
         """
@@ -158,4 +157,3 @@ class ThreadingTree:
         for id1 in self.get_id_of_leafs():
             res.append(copy.deepcopy(self.filenames_dict[id1]))
         return res
-

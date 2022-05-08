@@ -18,16 +18,12 @@ Options:
     -d --debug                      use for debug options - will not run the commands in parallel, but one by one
 """
 
-from Utility.generators_utilities import getLineFromChunk, class_generator
+from Utility.generators_utilities import class_generator
 from Utility.Pileup_class import Pileup_line
 import itertools
-import pandas as pd
 import os
-import re
 from docopt import docopt
 import sys
-import subprocess
-from Utility.logger_utils import get_Pipes_dir
 from Experiments.frontiers_jupyter.parallel_commands import parallel_commands
 
 
@@ -78,9 +74,9 @@ def is_pileup_line_edited(pileup_line: Pileup_line, read_thresh_hold=1, editing_
                 noise_reads += 1
         noise_percent = round(float(100 * (noise_reads / pileup_line.base_count)), 3)
     if is_reads_threshold_match(pileup_line, read_thresh_hold) and (editing_percent >= editing_min_percent_threshold
-                                                                    and editing_percent <= editing_max_percent_threshold) and (
-            noise_percent <= noise_percent_threshold) and (
-            editing_percent is not 0.0) and (candidate_nucl_reads >= editing_read_thresh):
+                                                                    and editing_percent <= editing_max_percent_threshold) \
+            and (noise_percent <= noise_percent_threshold) and (editing_percent is not 0.0) \
+            and (candidate_nucl_reads >= editing_read_thresh):
         is_editing_site = True
     else:
         is_editing_site = False
@@ -228,8 +224,7 @@ def analyse_editing_percent(pileup_file, out_file, summary_file=None, add_header
                                                                read_thresh_hold=min_reads,
                                                                editing_min_percent_threshold=float(min_editing),
                                                                noise_percent_threshold=float(max_noise),
-                                                               const_tag=edit_tag
-                                                               )
+                                                               const_tag=edit_tag)
             summary_dict[edit_type] += 1
 
             # add empty tag if we make it into a csv so the columns will align

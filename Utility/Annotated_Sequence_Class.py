@@ -1,7 +1,6 @@
-
-
 from abc import ABC, abstractmethod
 from collections.abc import MutableMapping
+
 
 class SamLineTags(MutableMapping):
     def __init__(self, *strings):
@@ -32,6 +31,7 @@ class SamLineTags(MutableMapping):
         str_tags = [':'.join([key, type, val]) for key, (type, val) in self.dict.items()]
         return '\t'.join(str_tags)
 
+
 class Annotated_Sequence(ABC):
 
     def __init__(self, tags):
@@ -40,15 +40,13 @@ class Annotated_Sequence(ABC):
     @property
     @abstractmethod
     # (reference string,start,end) where start and end are relative to the 1st position in reference
-    def position(self):...
+    def position(self): ...
 
     @position.setter
     @abstractmethod
-    def position(self):...
+    def position(self): ...
 
-
-
-    def annotate(self,string):
+    def annotate(self, string):
         # if we havent set an annotation field before
         if not ('annotate_count' in self.__dict__):
             self.annotate_count = sum('annotate' in tag for tag in self.tags)
@@ -60,4 +58,4 @@ class Annotated_Sequence(ABC):
         return
 
     @abstractmethod
-    def flip_strand(self):...
+    def flip_strand(self): ...

@@ -5,6 +5,7 @@ import operator
 import itertools
 import logging
 
+
 def fileGetChunks(file1, size=10000):
     """
     :param file1: the open file
@@ -52,7 +53,7 @@ def getKLinesFromChunk(file, size=40000, k=4, remove_header=False):
     k_batch = []
     for line in gen:
         # got k lines, yield them
-        #TODO use group_generator
+        # TODO use group_generator
         k_batch.append(line)
         if len(k_batch) == k:
             yield k_batch
@@ -104,15 +105,14 @@ def class_generator(class_type, skip_condition=lambda x: False, file=None, gen=N
         else:
             gen = getKLinesFromChunk(file, k=number_of_lines)
 
-    for line_num,line in enumerate(gen):
+    for line_num, line in enumerate(gen):
         try:
             if not skip_condition(line):
                 yield class_type(line, **class_kwargs)
         except Exception as e:
-            logging.exception(f"In file {file}, In line {number_of_lines*line_num}, Exception was raised when loading class {class_type}")
+            logging.exception(
+                f"In file {file}, In line {number_of_lines * line_num}, Exception was raised when loading class {class_type}")
             continue
-
-
 
     return
 
@@ -274,6 +274,7 @@ def add_to_window_and_promote_middle(gen2, middle_item, middle_list):
         return None
     return middle_item
 
+
 def split_on_condition(seq, condition):
     """
     splits gen to two gens based on whether the condition evaluated the items to true or false
@@ -284,6 +285,7 @@ def split_on_condition(seq, condition):
     """
     l1, l2 = itertools.tee((condition(item), item) for item in seq)
     return (i for p, i in l1 if p), (i for p, i in l2 if not p)
+
 
 def zip_equal(*iterables):
     """
@@ -297,7 +299,8 @@ def zip_equal(*iterables):
             raise ValueError('Iterables have different lengths')
         yield combo
 
-def group_generator(iterable,n):
+
+def group_generator(iterable, n):
     "group_generator(3, 'ABCDEFGHI') --> ABC DEF GHI"
     args = [iter(iterable)] * n
     return zip_equal(*args)

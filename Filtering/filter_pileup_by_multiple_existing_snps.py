@@ -1,4 +1,3 @@
-
 import Utility.generators_utilities as gen_util
 from Utility.Pileup_class import Pileup_line
 from Utility.Vcf_class import VcfClass
@@ -23,14 +22,13 @@ def snp_algebra_from_vcf_file(pileup_filename, vcf_file, output_file=None, sorte
     :return
     """
 
-
     # sorting pileups if necessary and preparing filenames
     if not sorted_input:
         multiline_sort_pileup(1, '~~~', 1, pileup_filename, 2, pileup_filename + "_sorted.pileup")
         sorted_positive_pileup = pileup_filename + "_sorted.pileup"
     else:
         sorted_positive_pileup = pileup_filename
-    #with open(sorted_positive_pileup, "r") as sorted_positive_pileup:
+    # with open(sorted_positive_pileup, "r") as sorted_positive_pileup:
     #   print("sorted_positive_pileup",sorted_positive_pileup.readlines())
     if output_file is None:
         splited = sorted_positive_pileup.split(".")
@@ -38,19 +36,21 @@ def snp_algebra_from_vcf_file(pileup_filename, vcf_file, output_file=None, sorte
     get_pos_and_id = lambda x: (x.reference_id, x.gene_pos)
     # logic of the function
     try:
-        with open(vcf_file, 'r') as vcf_obj, open(sorted_positive_pileup, 'r') as pileup_obj,\
-             open(output_file, 'w') as out:
-            
+        with open(vcf_file, 'r') as vcf_obj, open(sorted_positive_pileup, 'r') as pileup_obj, \
+                open(output_file, 'w') as out:
+
             pos_gen = gen_util.class_generator(Pileup_line, file=pileup_obj)
             vcf_gen = gen_util.class_generator(VcfClass, file=vcf_obj)
             parallel_gen = parallel_generator([pos_gen, vcf_gen],
                                               [get_pos_and_id for i in range(2)])
             for listlist in parallel_gen:  # listlist: list of lists, each entry in listlist is a list of items from one generator
-                if (listlist[0] is not None and listlist[1] is None):  # listlist[0]: list of pileup_lines(should be 1 line) from the input pileup
+                if (listlist[0] is not None and listlist[
+                    1] is None):  # listlist[0]: list of pileup_lines(should be 1 line) from the input pileup
                     out.write(str(listlist[0][0]) + "\n")
     except Exception as e:
         print(e)
     return output_file
+
 
 def snp_algebra(pileup_filename, negative_pileup_list, snp_detector=snp_detect, output_file=None,
                 sorted_input=True, keep_pos_in_neg=True):

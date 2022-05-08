@@ -362,8 +362,8 @@ class PipeTester():
         commands=[]
         for node in graph_dict.keys():
             pileups=            [dirstruct.pathName(fastq,node,Stages.editing_percent_unique) for fastq in positive_fastqs ]
-            filtered_pileups=   [dirstruct.pathName(fastq,node,Stages.concensus,ConcensusStage.filtered) for fastq in positive_fastqs ]
-            concensus_pileup=   dirstruct.pathName(None,node,Stages.concensus,ConcensusStage.concensus)
+            filtered_pileups=   [dirstruct.pathName(fastq, node, Stages.consensus, ConcensusStage.filtered) for fastq in positive_fastqs]
+            concensus_pileup=   dirstruct.pathName(None, node, Stages.consensus, ConcensusStage.concensus)
 
             if skip_existing_files and \
                     all([os.path.isfile(file) for file in filtered_pileups+[concensus_pileup]]):
@@ -372,7 +372,7 @@ class PipeTester():
                     f"SKIP pileup concensus filtering for file {node} since {filtered_pileups + [concensus_pileup]} already exists")
                 continue
 
-            # format for filter by concensus is (in_pileups,thresh,out_pileups,concensus_pileup,is_sorted)
+            # format for filter by consensus is (in_pileups,thresh,out_pileups,concensus_pileup,is_sorted)
             command=[filter_by_consensus,pileups,consensus_threshold,filtered_pileups,concensus_pileup,True]
             commands.append(command)
 
@@ -410,8 +410,8 @@ class PipeTester():
 
         nodes=list(graph_dict.keys())
         # calculate editing percent and editing site distribution summary for each lib and node
-        in_pileups=[dirstruct.pathName(fastq,node,Stages.concensus,ConcensusStage.filtered) for node,fastq
-                    in itertools.product(nodes,positive_fastqs) ]
+        in_pileups=[dirstruct.pathName(fastq, node, Stages.consensus, ConcensusStage.filtered) for node, fastq
+                    in itertools.product(nodes,positive_fastqs)]
         out_pileups=[dirstruct.pathName(fastq,node,Stages.editing_type_count,EditTypeStage.edit_percent_pileup) for node,fastq
                     in itertools.product(nodes, positive_fastqs)]
         out_summaries=[dirstruct.pathName(fastq,node,Stages.editing_type_count,EditTypeStage.file_summary) for node,fastq

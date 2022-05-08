@@ -30,9 +30,7 @@ def parallel_commands(list_commands, parallel_limit=2, disable_parallel=True):
 
     else:
         pool = ThreadPool(parallel_limit)
-
         pool.starmap(apply, commands)
-
         pool.close()
         pool.join()
 

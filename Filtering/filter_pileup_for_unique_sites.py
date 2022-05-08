@@ -1,18 +1,15 @@
 
 
-##############################################################################################################################
+########################################################################################################################
 # Author:  Roni Haas
-# Main goal: Takes several pileup files and for each one prints to a new file only unique sites (that is, only sites that are
-# not in any of the other pileup files)
-##############################################################################################################################
+# Main goal: Takes several pileup files and for each one prints to a new file only unique sites
+# (that is, only sites that are not in any of the other pileup files)
+########################################################################################################################
 
-from docopt import docopt
-import sys
 import shutil
 import Utility.generators_utilities as gen_util
 from Utility.Pileup_class import Pileup_line
 from Utility.parallel_generator import parallel_generator
-from Processing.pileup_sorting import pileup_sort
 from Utility.multiline_sort import multiline_sort_pileup
 
 def get_candidate_nucl(pileup_line):

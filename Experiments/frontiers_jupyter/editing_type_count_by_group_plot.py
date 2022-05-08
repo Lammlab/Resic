@@ -1,5 +1,5 @@
 """editing_type_count_by_group
-    Generating a editing site distribution plot for RESIC
+    Generates an editing site distribution plot for RESIC
 """
 from Experiments.frontiers_jupyter.bar_utils import stacked_bar
 import numpy as np
@@ -38,7 +38,7 @@ def editing_type_count_by_group_plot(lib_name, group_dict: Dict, dirstruct: Dire
         summary_files = [dirstruct.pathName(lib_name, node, Stages.editing_type_count, EditTypeStage.file_summary)
                          for node in group_nodes]
 
-        # calculatte aggregate distribution
+        # calculate aggregate distribution
         aggregate_counts, count_summary, pileup_length = editing_site_count_per_type(editing_percent_pileups,
                                                                                      summary_files)
         # save it for plot
