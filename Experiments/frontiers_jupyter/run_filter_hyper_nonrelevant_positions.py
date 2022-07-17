@@ -126,25 +126,23 @@ def real_pipe():
     reverse = False
 
     # the output directory 
-    root_dir = "/Data2/users/clara/resic_split/root_dir"
+    root_dir = ""
 
     # no need to add a path for a regular run.
     if reverse:
         root_dir += ""
 
     # the directory in which the fastq input files are located
-    data_dir = "/Data2/users/berta/Resic_test_output"
+    data_dir = ""
     # a path to a fasta file to use as a reference genome (either indexed or not indexed)
-    reference_library = "/Data2/reference_genomes/ws220/ws220-allchro_with_chr_M.fasta"
+    reference_library = ""
 
     # a list of fastq sample names for which you want to detect editing sites
-    positive_fastqs = ['N2_E_27_Orna_illumina_rep_1.united.fastq.collapsed',
-                       'N2_E_27_Orna_illumina_rep_2.united.fastq.collapsed']
+    positive_fastqs = []
 
     # Optional-  a list of fastq sample names that will be used to exclude non-editing sites.
     # these can be DNA reads or mutant strains that are lacking the editing mechanism.               
-    negative_fastqs = ['BB21_E_27_Orna_illumina.united.fastq.collapsed',
-                       'BB21_E_29_Alla_illumina.united.fastq.collapsed']
+    negative_fastqs = []
 
     # Optional - a dbSNP vcf file, currently WITH NO HEADERS, to exclude SNPs.
     # remove all lines that start with #

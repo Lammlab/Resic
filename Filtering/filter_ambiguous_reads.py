@@ -110,7 +110,7 @@ def extract_from_fastq(fq, output_fq):
     """
     input_iterator = SeqIO.parse(fq, "fastq")
     # gos over each record and tests if the read meets the requirements
-    short_iterator = (rec for rec in input_iterator if filter_by_quality(rec.letter_annotations["phred_quality"]) \
+    short_iterator = (rec for rec in input_iterator if filter_by_quality(rec.letter_annotations["phred_quality"])
                       and filter_by_single_nucleotide_appearance(rec.seq) and filter_by_long_stretches_repeats(rec.seq))
     # writes to a new file after the conversion to a fastq format
     SeqIO.write(short_iterator, output_fq, "fastq")
